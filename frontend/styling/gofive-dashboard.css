@@ -1,0 +1,365 @@
+/**
+ * GoFive Internal Speed Test Dashboard
+ * UI layer for LibreSpeed
+ *
+ * This file controls presentation only.
+ * LibreSpeed engine files are not modified.
+ */
+
+:root {
+  --gf-bg-primary: #09051d;
+  --gf-bg-secondary: #140b35;
+  --gf-panel: rgba(24, 15, 58, 0.76);
+  --gf-panel-strong: rgba(22, 13, 55, 0.92);
+
+  --gf-border: rgba(255, 255, 255, 0.14);
+  --gf-border-soft: rgba(255, 255, 255, 0.08);
+
+  --gf-text: #ffffff;
+  --gf-text-muted: #a7a2b7;
+  --gf-text-soft: #d8d5e1;
+
+  --gf-cyan: #40e9ed;
+  --gf-cyan-soft: rgba(64, 233, 237, 0.18);
+
+  --gf-pink: #d931c5;
+  --gf-pink-soft: rgba(217, 49, 197, 0.18);
+
+  --gf-success: #42e485;
+  --gf-danger: #ff5f87;
+
+  --gf-radius-small: 12px;
+  --gf-radius-medium: 18px;
+  --gf-radius-large: 28px;
+
+  --gf-shadow:
+    0 22px 60px rgba(0, 0, 0, 0.24),
+    0 0 40px rgba(64, 233, 237, 0.04);
+
+  --gf-content-width: 1080px;
+}
+
+
+/* =========================================================
+   Reset
+========================================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  min-height: 100%;
+  font-size: 10px;
+  background-color: var(--gf-bg-primary);
+}
+
+body {
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  font-family:
+    "Inter",
+    "Noto Sans Thai",
+    "Leelawadee UI",
+    "Tahoma",
+    sans-serif;
+  color: var(--gf-text);
+  background:
+    linear-gradient(
+      rgba(9, 5, 29, 0.64),
+      rgba(9, 5, 29, 0.82)
+    ),
+    url("../images/background.jpeg") center / cover fixed no-repeat;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+}
+
+
+/* =========================================================
+   Application shell
+========================================================= */
+
+.gofive-app {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+}
+
+.gofive-app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 28% 55%,
+      rgba(217, 49, 197, 0.11),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 72% 42%,
+      rgba(64, 233, 237, 0.1),
+      transparent 30%
+    );
+}
+
+.gofive-app::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px
+    );
+  background-size: 48px 48px;
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent,
+      black 28%,
+      black 72%,
+      transparent
+    );
+}
+
+.gofive-dashboard {
+  width: min(
+    var(--gf-content-width),
+    calc(100% - 40px)
+  );
+  margin: 0 auto;
+  padding: 64px 0 28px;
+}
+
+
+/* =========================================================
+   Generic panel
+========================================================= */
+
+.gofive-panel {
+  border: 1px solid var(--gf-border);
+  border-radius: var(--gf-radius-medium);
+  background: var(--gf-panel);
+  box-shadow: var(--gf-shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+
+/* =========================================================
+   Heading foundation
+========================================================= */
+
+.gofive-heading {
+  margin-bottom: 42px;
+  text-align: center;
+}
+
+.gofive-heading h1 {
+  color: var(--gf-text);
+  font-size: clamp(3.8rem, 5vw, 5.4rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.055em;
+}
+
+.gofive-heading .tagline {
+  margin-top: 12px;
+  color: var(--gf-cyan);
+  font-size: clamp(1.5rem, 2vw, 1.9rem);
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+
+/* =========================================================
+   Utility classes
+========================================================= */
+
+.hidden {
+  display: none !important;
+}
+
+.gofive-muted {
+  color: var(--gf-text-muted);
+}
+
+.gofive-cyan {
+  color: var(--gf-cyan);
+}
+
+.gofive-pink {
+  color: var(--gf-pink);
+}
+
+.gofive-text-center {
+  text-align: center;
+}
+
+
+/* =========================================================
+   Animation foundation
+========================================================= */
+
+@keyframes gofiveFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gofiveGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 8px 30px rgba(64, 233, 237, 0.14),
+      0 0 0 rgba(64, 233, 237, 0);
+  }
+
+  50% {
+    box-shadow:
+      0 10px 36px rgba(64, 233, 237, 0.26),
+      0 0 32px rgba(64, 233, 237, 0.12);
+  }
+}
+
+.gofive-animate-in {
+  animation: gofiveFadeUp 0.55s ease both;
+}
+
+
+/* =========================================================
+   Footer foundation
+========================================================= */
+
+.gofive-footer {
+  width: min(
+    var(--gf-content-width),
+    calc(100% - 40px)
+  );
+  margin: auto auto 0;
+  padding: 26px 0 34px;
+  color: var(--gf-text-muted);
+  text-align: center;
+}
+
+.gofive-footer p {
+  font-size: 1.2rem;
+  line-height: 1.7;
+}
+
+.gofive-footer a {
+  color: var(--gf-cyan);
+  text-underline-offset: 4px;
+}
+
+
+/* =========================================================
+   Accessibility
+========================================================= */
+
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid rgba(64, 233, 237, 0.55);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* =========================================================
+   Tablet
+========================================================= */
+
+@media screen and (max-width: 900px) {
+  html {
+    font-size: 9px;
+  }
+
+  .gofive-dashboard {
+    width: min(100% - 28px, 760px);
+    padding-top: 46px;
+  }
+
+  .gofive-heading {
+    margin-bottom: 34px;
+  }
+}
+
+
+/* =========================================================
+   Mobile
+========================================================= */
+
+@media screen and (max-width: 600px) {
+  html {
+    font-size: 8px;
+  }
+
+  body {
+    background-attachment: scroll;
+  }
+
+  .gofive-dashboard {
+    width: min(100% - 22px, 480px);
+    padding-top: 34px;
+  }
+
+  .gofive-heading {
+    margin-bottom: 28px;
+  }
+
+  .gofive-heading h1 {
+    letter-spacing: -0.035em;
+  }
+
+  .gofive-footer {
+    width: calc(100% - 24px);
+    padding-bottom: 24px;
+  }
+}
