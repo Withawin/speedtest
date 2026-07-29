@@ -1877,3 +1877,383 @@ body.test-state-completed .gauge {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================
+   Commit 9 — Gauge Animation & Visual Polish
+========================================================== */
+
+/*
+ * ทำให้ค่าที่ Controller ส่งผ่าน CSS Variables
+ * เคลื่อนไหวอย่างนุ่มนวล
+ */
+.gofive-gauge,
+.gauge {
+  transition:
+    transform 280ms ease,
+    filter 280ms ease,
+    opacity 280ms ease,
+    box-shadow 280ms ease;
+}
+
+.gofive-gauge *,
+.gauge * {
+  transition:
+    transform 260ms ease-out,
+    opacity 220ms ease,
+    color 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease;
+}
+
+.gofive-gauge__needle,
+.gauge-needle,
+.speed-needle {
+  transform:
+    rotate(var(--speed-rotation, -120deg));
+
+  transform-origin: 50% 100%;
+
+  transition:
+    transform 240ms
+    cubic-bezier(0.22, 1, 0.36, 1);
+
+  will-change: transform;
+}
+
+.gofive-gauge__progress,
+.gauge-progress,
+.progress-ring {
+  transition:
+    transform 260ms ease-out,
+    stroke-dashoffset 260ms ease-out,
+    opacity 220ms ease;
+
+  will-change:
+    transform,
+    stroke-dashoffset;
+}
+
+body.test-state-idle .gofive-gauge,
+body.test-state-idle .gauge {
+  filter: brightness(0.96);
+}
+
+body.test-state-idle .gofive-result-layout {
+  opacity: 0.96;
+}
+
+body.test-state-preparing .gofive-gauge,
+body.test-state-preparing .gauge {
+  animation:
+    gofive-gauge-preparing 1.4s
+    ease-in-out infinite;
+}
+
+body.test-state-preparing #start-button {
+  cursor: progress;
+}
+
+@keyframes gofive-gauge-preparing {
+  0%,
+  100% {
+    opacity: 0.84;
+    transform: scale(0.99);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+body.test-state-running .gofive-gauge,
+body.test-state-running .gauge {
+  filter:
+    brightness(1.08)
+    drop-shadow(
+      0 0 1.25rem rgba(255, 255, 255, 0.09)
+    );
+}
+
+body.test-state-running .download {
+  animation:
+    gofive-download-active 2.2s
+    ease-in-out infinite;
+}
+
+body.test-state-running .upload {
+  animation:
+    gofive-upload-active 2.2s
+    ease-in-out infinite 180ms;
+}
+
+@keyframes gofive-download-active {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-0.2rem);
+  }
+}
+
+@keyframes gofive-upload-active {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-0.2rem);
+  }
+}
+
+.gofive-gauge-value,
+.gauge-value,
+.download .value,
+.upload .value {
+  font-variant-numeric:
+    tabular-nums lining-nums;
+
+  letter-spacing: -0.035em;
+
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease;
+}
+
+body.test-state-running .download .value,
+body.test-state-running .upload .value,
+body.test-state-running .gofive-gauge-value,
+body.test-state-running .gauge-value {
+  transform: scale(1.015);
+}
+
+.gofive-result-layout .ping,
+.gofive-result-layout .jitter {
+  min-width: 0;
+
+  transition:
+    opacity 240ms ease,
+    visibility 240ms ease,
+    transform 240ms ease;
+}
+
+.gofive-result-layout .ping.hidden,
+.gofive-result-layout .jitter.hidden {
+  display: flex;
+
+  visibility: hidden;
+  opacity: 0;
+
+  transform: translateY(0.4rem);
+
+  pointer-events: none;
+}
+
+body.test-state-running .gofive-result-layout .ping,
+body.test-state-running .gofive-result-layout .jitter,
+body.test-state-completed .gofive-result-layout .ping,
+body.test-state-completed .gofive-result-layout .jitter {
+  visibility: visible;
+  opacity: 1;
+
+  transform: translateY(0);
+}
+
+#start-button {
+  position: relative;
+  overflow: hidden;
+
+  isolation: isolate;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 220ms ease,
+    opacity 180ms ease,
+    filter 180ms ease;
+}
+
+#start-button:hover {
+  transform: translateY(-0.12rem);
+}
+
+#start-button:active {
+  transform: translateY(0) scale(0.985);
+}
+
+#start-button:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.38);
+  outline-offset: 0.25rem;
+}
+
+body.test-state-preparing #start-button,
+body.test-state-running #start-button {
+  transform: none;
+
+  filter: brightness(1.04);
+
+  cursor: progress;
+}
+
+body.test-state-preparing #start-button::before,
+body.test-state-running #start-button::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  z-index: -1;
+
+  width: 42%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+
+  transform: translateX(-180%) skewX(-18deg);
+
+  animation:
+    gofive-button-shimmer 1.8s
+    ease-in-out infinite;
+
+  pointer-events: none;
+}
+
+@keyframes gofive-button-shimmer {
+  0% {
+    transform:
+      translateX(-180%)
+      skewX(-18deg);
+  }
+
+  70%,
+  100% {
+    transform:
+      translateX(340%)
+      skewX(-18deg);
+  }
+}
+
+.gofive-result-summary:not(.hidden) {
+  animation:
+    gofive-summary-enter 460ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+}
+
+@keyframes gofive-summary-enter {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(1rem)
+      scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+.gofive-result-summary:not(.hidden)
+.gofive-summary-metric {
+  animation:
+    gofive-summary-metric-enter 420ms
+    ease-out both;
+}
+
+.gofive-result-summary:not(.hidden)
+.gofive-summary-metric:nth-child(1) {
+  animation-delay: 50ms;
+}
+
+.gofive-result-summary:not(.hidden)
+.gofive-summary-metric:nth-child(2) {
+  animation-delay: 100ms;
+}
+
+.gofive-result-summary:not(.hidden)
+.gofive-summary-metric:nth-child(3) {
+  animation-delay: 150ms;
+}
+
+.gofive-result-summary:not(.hidden)
+.gofive-summary-metric:nth-child(4) {
+  animation-delay: 200ms;
+}
+
+@keyframes gofive-summary-metric-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.65rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+body.test-state-completed .gofive-result-layout {
+  animation:
+    gofive-test-completed 420ms
+    ease-out;
+}
+
+@keyframes gofive-test-completed {
+  0% {
+    filter: brightness(1);
+  }
+
+  45% {
+    filter: brightness(1.12);
+  }
+
+  100% {
+    filter: brightness(1);
+  }
+}
+
+.gofive-result-layout {
+  contain: layout style;
+
+  min-height: 17rem;
+}
+
+.gofive-test-information {
+  min-height: 5rem;
+}
+
+#share-results {
+  min-height: 2.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+
+    transition-duration: 0.01ms !important;
+  }
+
+  body.test-state-running .download,
+  body.test-state-running .upload,
+  body.test-state-preparing .gofive-gauge,
+  body.test-state-preparing .gauge {
+    transform: none;
+  }
+}
