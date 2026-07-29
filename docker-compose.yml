@@ -1,0 +1,38 @@
+services:
+  speedtest:
+    image: ghcr.io/Withawin/speedtest:latest
+    container_name: gofive-internal-speedtest
+
+    restart: unless-stopped
+
+    environment:
+      MODE: standalone
+      TITLE: "Gofive Internal Speed Test"
+      TAGLINE: "Internal Network Performance Testing"
+      USE_NEW_DESIGN: "true"
+      TELEMETRY: "false"
+      DISABLE_IPINFO: "true"
+      WEBPORT: "8080"
+
+    ports:
+      - "8080:8080"
+
+    security_opt:
+      - no-new-privileges:true
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:8080/ || exit 1"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

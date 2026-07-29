@@ -1,0 +1,30 @@
+:root {
+    --gofive-orange: #f58220;
+    --gofive-dark: #20242a;
+    --gofive-light: #f7f8fa;
+}
+
+body {
+    background:
+        linear-gradient(
+            rgba(255, 255, 255, 0.94),
+            rgba(255, 255, 255, 0.94)
+        ),
+        url("../images/background.webp") center / cover fixed;
+}
+
+.gofive-logo {
+    display: block;
+    width: min(220px, 60vw);
+    height: auto;
+    margin: 0 auto 18px;
+}
+
+button {
+    border-radius: 12px;
+}
+
+footer {
+    margin-top: 30px;
+    text-align: center;
+}

@@ -32,6 +32,8 @@ COPY favicon.ico /speedtest/
 COPY manifest.webmanifest /speedtest/
 COPY images/ /speedtest/images/
 
+COPY custom/ /speedtest/custom/
+
 COPY docker/entrypoint.sh /
 
 # Prepare default environment variables
