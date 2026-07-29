@@ -9,7 +9,7 @@ services:
       MODE: standalone
 
       # false = LibreSpeed Classic UI เดิม
-      USE_NEW_DESIGN: "false"
+      USE_NEW_DESIGN: "true"
 
       TELEMETRY: "false"
       DISABLE_IPINFO: "true"
