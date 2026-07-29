@@ -279,6 +279,87 @@
         >
           แชร์ผลการทดสอบ
         </button>
+<section
+  id="test-result-summary"
+  class="gofive-result-summary hidden"
+  aria-labelledby="result-summary-title"
+>
+  <div class="gofive-result-summary__header">
+    <div>
+      <small>ผลการทดสอบล่าสุด</small>
+
+      <h2 id="result-summary-title">
+        Test Summary
+      </h2>
+    </div>
+
+    <span
+      id="result-summary-status"
+      class="gofive-result-summary__status"
+    >
+      สำเร็จ
+    </span>
+  </div>
+
+  <div class="gofive-result-summary__metrics">
+
+    <article class="gofive-summary-metric">
+      <small>Download</small>
+
+      <strong>
+        <span id="summary-download">-</span>
+        <span class="gofive-summary-unit">Mbps</span>
+      </strong>
+    </article>
+
+    <article class="gofive-summary-metric">
+      <small>Upload</small>
+
+      <strong>
+        <span id="summary-upload">-</span>
+        <span class="gofive-summary-unit">Mbps</span>
+      </strong>
+    </article>
+
+    <article class="gofive-summary-metric">
+      <small>Ping</small>
+
+      <strong>
+        <span id="summary-ping">-</span>
+        <span class="gofive-summary-unit">ms</span>
+      </strong>
+    </article>
+
+    <article class="gofive-summary-metric">
+      <small>Jitter</small>
+
+      <strong>
+        <span id="summary-jitter">-</span>
+        <span class="gofive-summary-unit">ms</span>
+      </strong>
+    </article>
+
+  </div>
+
+  <div class="gofive-result-summary__details">
+
+    <article>
+      <small>ระยะเวลาทดสอบ</small>
+      <strong id="summary-duration">-</strong>
+    </article>
+
+    <article>
+      <small>เซิร์ฟเวอร์</small>
+      <strong id="summary-server">-</strong>
+    </article>
+
+    <article>
+      <small>ทดสอบเสร็จเมื่อ</small>
+      <strong id="summary-completed-at">-</strong>
+    </article>
+
+  </div>
+</section>
 
 
         <!-- ==================================================

@@ -17,6 +17,7 @@
 
   let currentTestState = "idle";
   let testStartedAt = null;
+  let lastTestResult = null;
 
 /**
 * ค้นหา Element ด้วย ID
@@ -305,9 +306,17 @@ function formatSpecifiedDateTime(date) {
   /**
    * อัปเดตวันและเวลา
    */
-  function updateDateTime() {
-    setText("test-date-time", formatDateTime());
+function updateDateTime() {
+  if (
+    currentTestState === "running" ||
+    currentTestState === "preparing" ||
+    currentTestState === "completed"
+  ) {
+    return;
   }
+
+  setText("test-date-time", formatDateTime());
+}
 
   /**
    * อัปเดตข้อมูลพื้นฐานของ Client
@@ -417,6 +426,124 @@ function readNumericValue(element) {
   return Number.isFinite(numericValue)
     ? numericValue
     : 0;
+}
+
+/**
+ * อ่านค่าตัวเลขจาก Selector หลายรูปแบบ
+ *
+ * @param {string[]} selectors
+ * @returns {number|null}
+ */
+function readValueFromSelectors(selectors) {
+  for (const selector of selectors) {
+    const element = document.querySelector(selector);
+
+    if (!element) {
+      continue;
+    }
+
+    const value = readNumericValue(element);
+
+    if (Number.isFinite(value)) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * จัดรูปแบบค่าผลทดสอบ
+ *
+ * @param {number|null} value
+ * @param {number} decimalPlaces
+ * @returns {string}
+ */
+function formatResultValue(value, decimalPlaces = 2) {
+  if (
+    value === null ||
+    value === undefined ||
+    !Number.isFinite(value)
+  ) {
+    return "-";
+  }
+
+  return value.toFixed(decimalPlaces);
+}
+
+/**
+ * คำนวณระยะเวลาทดสอบ
+ *
+ * @param {Date|null} startedAt
+ * @param {Date} completedAt
+ * @returns {number}
+ */
+function calculateTestDuration(startedAt, completedAt) {
+  if (
+    !(startedAt instanceof Date) ||
+    !(completedAt instanceof Date)
+  ) {
+    return 0;
+  }
+
+  const durationMilliseconds =
+    completedAt.getTime() - startedAt.getTime();
+
+  return Math.max(
+    0,
+    Math.round(durationMilliseconds / 1000)
+  );
+}
+
+/**
+ * จัดรูปแบบระยะเวลา
+ *
+ * @param {number} durationSeconds
+ * @returns {string}
+ */
+function formatDuration(durationSeconds) {
+  if (!Number.isFinite(durationSeconds)) {
+    return "-";
+  }
+
+  if (durationSeconds < 60) {
+    return `${durationSeconds} วินาที`;
+  }
+
+  const minutes = Math.floor(durationSeconds / 60);
+  const seconds = durationSeconds % 60;
+
+  return `${minutes} นาที ${seconds} วินาที`;
+}
+
+/**
+ * อ่านค่า Ping
+ *
+ * @returns {number|null}
+ */
+function readPingValue() {
+  return readValueFromSelectors([
+    "#ping-value",
+    "#ping",
+    ".ping .value",
+    ".ping strong",
+    ".ping"
+  ]);
+}
+
+/**
+ * อ่านค่า Jitter
+ *
+ * @returns {number|null}
+ */
+function readJitterValue() {
+  return readValueFromSelectors([
+    "#jitter-value",
+    "#jitter",
+    ".jitter .value",
+    ".jitter strong",
+    ".jitter"
+  ]);
 }
 
 /**
@@ -951,6 +1078,129 @@ function setLatencyMetricsVisibility(visible) {
 }
 
 /**
+ * บันทึกผลการทดสอบจาก Dashboard
+ *
+ * @returns {object}
+ */
+function captureTestResult() {
+  const completedAt = new Date();
+
+  const result = {
+    download: readValueFromSelectors([
+      "#download-gauge .value",
+      "#download-gauge strong",
+      "#download-gauge"
+    ]),
+
+    upload: readValueFromSelectors([
+      "#upload-gauge .value",
+      "#upload-gauge strong",
+      "#upload-gauge"
+    ]),
+
+    ping: readPingValue(),
+
+    jitter: readJitterValue(),
+
+    server:
+      readSelectedServer() ||
+      "ไม่สามารถระบุได้",
+
+    startedAt: testStartedAt,
+
+    completedAt,
+
+    durationSeconds: calculateTestDuration(
+      testStartedAt,
+      completedAt
+    )
+  };
+
+  lastTestResult = result;
+
+  return result;
+}
+
+/**
+ * แสดงผลการทดสอบใน Summary Panel
+ *
+ * @param {object} result
+ */
+function renderTestResultSummary(result) {
+  if (!result) {
+    return;
+  }
+
+  setText(
+    "summary-download",
+    formatResultValue(result.download)
+  );
+
+  setText(
+    "summary-upload",
+    formatResultValue(result.upload)
+  );
+
+  setText(
+    "summary-ping",
+    formatResultValue(result.ping)
+  );
+
+  setText(
+    "summary-jitter",
+    formatResultValue(result.jitter)
+  );
+
+  setText(
+    "summary-duration",
+    formatDuration(result.durationSeconds)
+  );
+
+  setText(
+    "summary-server",
+    result.server || "-"
+  );
+
+  setText(
+    "summary-completed-at",
+    formatSpecifiedDateTime(result.completedAt)
+  );
+
+  const summaryPanel = getElement(
+    "test-result-summary"
+  );
+
+  if (summaryPanel) {
+    summaryPanel.classList.remove("hidden");
+  }
+
+  const shareButton = getElement("share-results");
+
+  if (shareButton) {
+    shareButton.classList.remove("hidden");
+  }
+}
+
+/**
+ * เตรียม Summary สำหรับการทดสอบรอบใหม่
+ */
+function prepareSummaryForNewTest() {
+  const summaryPanel = getElement(
+    "test-result-summary"
+  );
+
+  if (summaryPanel) {
+    summaryPanel.classList.add("hidden");
+  }
+
+  const shareButton = getElement("share-results");
+
+  if (shareButton) {
+    shareButton.classList.add("hidden");
+  }
+}
+
+/**
  * นำสถานะ Test ไปใช้กับ Dashboard
  *
  * @param {"idle"|"preparing"|"running"|"completed"} nextState
@@ -1011,6 +1261,7 @@ function applyTestState(nextState) {
 
     resetTestMetadata();
     syncSelectedServer();
+    prepareSummaryForNewTest();
   }
 
   /*
@@ -1024,10 +1275,22 @@ function applyTestState(nextState) {
   /*
    * เมื่อทดสอบเสร็จให้อ่าน Test ID อีกครั้ง
    */
-  if (nextState === "completed") {
-    syncTestId();
-    syncSelectedServer();
-  }
+if (
+  nextState === "completed" &&
+  previousState !== "completed"
+) {
+  syncTestId();
+  syncSelectedServer();
+
+  /*
+   * รอให้ LibreSpeed อัปเดตค่าครั้งสุดท้ายก่อน Capture
+   */
+  window.setTimeout(() => {
+    const result = captureTestResult();
+
+    renderTestResultSummary(result);
+  }, 300);
+}
 }
 
 /**
