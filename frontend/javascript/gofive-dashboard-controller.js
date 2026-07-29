@@ -431,25 +431,191 @@
     );
   }
 
-  /**
-   * เตรียมช่อง IP Address
-   *
-   * JavaScript ฝั่ง Browser ไม่สามารถค้นหา Public IP
-   * ได้เองโดยไม่มี Backend หรือ API
+/**
+ * แยกข้อมูล IP และ ISP ที่ได้จาก LibreSpeed Backend
+ *
+ * รองรับ Response เช่น:
+ *
+ * {
+ *   "processedString": "172.17.0.1",
+ *   "rawIspInfo": ""
+ * }
+ *
+ * รวมถึง Response แบบข้อความธรรมดา:
+ *
+ * 192.168.1.10
+ * 192.168.1.10 - ISP Name
+ *
+ * @param {string} responseText
+ * @returns {{ ip: string, isp: string }}
+ */
+function parseNetworkInformation(responseText) {
+  const cleanedText = String(responseText || "")
+    .replace(/\r/g, "")
+    .replace(/\n+/g, " ")
+    .trim();
+
+  if (!cleanedText) {
+    return {
+      ip: "",
+      isp: ""
+    };
+  }
+
+  /*
+   * ตรวจ JSON ก่อน เพราะ LibreSpeed getIP.php
+   * อาจตอบ processedString และ rawIspInfo
    */
-  function initializeIpAddress() {
-    const clientIp = getElement("client-ip");
+  if (
+    cleanedText.startsWith("{") &&
+    cleanedText.endsWith("}")
+  ) {
+    try {
+      const jsonResponse = JSON.parse(cleanedText);
 
-    if (!clientIp) {
-      return;
-    }
+      const processedString = String(
+        jsonResponse.processedString || ""
+      ).trim();
 
-    if (
-      clientIp.textContent.trim() === "กำลังตรวจสอบ..."
-    ) {
-      clientIp.textContent = "รอข้อมูลจากระบบ";
+      const rawIspInfo = String(
+        jsonResponse.rawIspInfo || ""
+      ).trim();
+
+      /*
+       * processedString บางระบบอาจมีทั้ง IP และ ISP:
+       * 192.168.1.10 - ISP Name
+       */
+      if (processedString.includes(" - ")) {
+        const separatorIndex =
+          processedString.indexOf(" - ");
+
+        return {
+          ip: processedString
+            .slice(0, separatorIndex)
+            .trim(),
+
+          isp:
+            rawIspInfo ||
+            processedString
+              .slice(separatorIndex + 3)
+              .trim()
+        };
+      }
+
+      return {
+        ip:
+          processedString ||
+          jsonResponse.ip ||
+          jsonResponse.clientIp ||
+          jsonResponse.address ||
+          "",
+
+        isp:
+          rawIspInfo ||
+          jsonResponse.isp ||
+          jsonResponse.provider ||
+          jsonResponse.organization ||
+          ""
+      };
+    } catch (error) {
+      console.warn(
+        "GoFive Dashboard: Invalid JSON IP response.",
+        error
+      );
     }
   }
+
+  /*
+   * รองรับข้อความรูปแบบ:
+   * IP - ISP
+   */
+  const separatorIndex = cleanedText.indexOf(" - ");
+
+  if (separatorIndex !== -1) {
+    return {
+      ip: cleanedText
+        .slice(0, separatorIndex)
+        .trim(),
+
+      isp: cleanedText
+        .slice(separatorIndex + 3)
+        .trim()
+    };
+  }
+
+  /*
+   * Response มีเฉพาะ IP
+   */
+  return {
+    ip: cleanedText,
+    isp: ""
+  };
+}
+
+/**
+ * ดึงข้อมูล IP และ ISP จาก LibreSpeed Backend
+ *
+ * Standalone PHP backend ใช้ endpoint:
+ * backend/getIP.php
+ */
+async function loadNetworkInformation() {
+  const clientIp = getElement("client-ip");
+  const clientProvider = getElement("client-provider");
+
+  if (clientIp) {
+    clientIp.textContent = "กำลังตรวจสอบ...";
+  }
+
+  if (clientProvider) {
+    clientProvider.textContent = "กำลังตรวจสอบ...";
+  }
+
+  try {
+    const response = await fetch(
+      `backend/getIP.php?t=${Date.now()}`,
+      {
+        method: "GET",
+        cache: "no-store",
+        headers: {
+          Accept: "text/plain"
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `IP endpoint returned HTTP ${response.status}`
+      );
+    }
+
+    const responseText = (await response.text()).trim();
+
+    if (!responseText) {
+      throw new Error("IP endpoint returned an empty response");
+    }
+
+    const networkInformation =
+      parseNetworkInformation(responseText);
+
+    setText(
+      "client-ip",
+      networkInformation.ip || "ไม่สามารถระบุได้"
+    );
+
+    setText(
+      "client-provider",
+      networkInformation.isp || "GoFive Internal"
+    );
+  } catch (error) {
+    console.warn(
+      "GoFive Dashboard: Unable to retrieve IP information.",
+      error
+    );
+
+    setText("client-ip", "ไม่สามารถระบุได้");
+    setText("client-provider", "GoFive Internal");
+  }
+}
 
   /**
    * Observe การเปลี่ยนแปลงของ LibreSpeed UI
@@ -507,11 +673,14 @@
       navigator.webkitConnection;
 
     window.addEventListener("online", () => {
-      updateNetworkStatus();
-      setText(
-        "connection-type",
-        detectConnectionType()
-      );
+        updateNetworkStatus();
+
+        setText(
+            "connection-type",
+            detectConnectionType()
+        );
+
+        loadNetworkInformation();
     });
 
     window.addEventListener("offline", () => {
@@ -539,7 +708,7 @@
     updateNetworkStatus();
     updateCurrentYear();
     updateDateTime();
-    initializeIpAddress();
+    loadNetworkInformation();
 
     /*
      * index.js ถูกโหลดหลัง Controller
