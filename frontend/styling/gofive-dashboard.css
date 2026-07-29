@@ -2257,3 +2257,478 @@ body.test-state-completed .gofive-result-layout {
     transform: none;
   }
 }
+
+/* ==========================================================
+   Commit 10 — Responsive Layout
+========================================================== */
+
+html {
+  overflow-x: hidden;
+}
+
+body {
+  min-width: 320px;
+  overflow-x: hidden;
+}
+
+img,
+svg,
+canvas {
+  max-width: 100%;
+}
+
+button,
+select,
+input {
+  max-width: 100%;
+}
+
+.gofive-dashboard,
+.gofive-dashboard-main,
+main {
+  width: 100%;
+  min-width: 0;
+}
+
+.gofive-dashboard-main,
+main {
+  padding-inline:
+    clamp(0.75rem, 2.5vw, 2rem);
+}
+
+.gofive-connection-information,
+.gofive-server-section,
+.gofive-test-controls,
+.gofive-result-layout,
+.gofive-result-summary,
+.gofive-test-information {
+  width: min(100%, 1180px);
+  margin-inline: auto;
+}
+
+.gofive-header,
+.gofive-dashboard-header {
+  width: min(100%, 1180px);
+  margin-inline: auto;
+  padding-inline: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.gofive-header__content,
+.gofive-dashboard-header__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  min-width: 0;
+}
+
+.gofive-header__brand,
+.gofive-dashboard-header__brand {
+  min-width: 0;
+}
+
+.gofive-header__brand h1,
+.gofive-dashboard-header__brand h1 {
+  overflow-wrap: anywhere;
+}
+
+.gofive-connection-information {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 1rem;
+}
+
+.gofive-connection-information article {
+  min-width: 0;
+}
+
+.gofive-connection-information strong {
+  display: block;
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gofive-server-section {
+  min-width: 0;
+}
+
+.server-selector {
+  width: 100%;
+  min-width: 0;
+}
+
+.server-selector button,
+#selected-server {
+  min-width: 0;
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.servers {
+  width: min(100%, 42rem);
+  max-height: min(24rem, 65vh);
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.gofive-test-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+
+  flex-wrap: wrap;
+}
+
+#start-button {
+  width: min(100%, 24rem);
+  min-height: 3.25rem;
+
+  padding-inline: 1.25rem;
+}
+
+#share-results {
+  width: auto;
+  max-width: 100%;
+  min-height: 2.75rem;
+
+  margin-inline: auto;
+}
+
+.gofive-result-layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(7rem, 0.7fr)
+    minmax(14rem, 1.4fr)
+    minmax(14rem, 1.4fr)
+    minmax(7rem, 0.7fr);
+
+  grid-template-areas:
+    "ping download upload jitter";
+
+  align-items: center;
+  justify-items: center;
+
+  gap: clamp(0.75rem, 2vw, 1.75rem);
+
+  min-width: 0;
+}
+
+.gofive-result-layout .ping {
+  grid-area: ping;
+}
+
+.gofive-result-layout .download {
+  grid-area: download;
+}
+
+.gofive-result-layout .upload {
+  grid-area: upload;
+}
+
+.gofive-result-layout .jitter {
+  grid-area: jitter;
+}
+
+.gofive-result-layout .ping,
+.gofive-result-layout .download,
+.gofive-result-layout .upload,
+.gofive-result-layout .jitter {
+  width: 100%;
+  min-width: 0;
+}
+
+.gofive-gauge,
+.gauge {
+  width:
+    clamp(13rem, 22vw, 19rem);
+
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.download,
+.upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+}
+
+.download .value,
+.upload .value,
+.gofive-gauge-value,
+.gauge-value {
+  max-width: 100%;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gofive-result-layout .ping,
+.gofive-result-layout .jitter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.gofive-result-layout .ping strong,
+.gofive-result-layout .jitter strong {
+  font-size:
+    clamp(1.35rem, 2.8vw, 2.25rem);
+
+  font-variant-numeric:
+    tabular-nums lining-nums;
+}
+
+.gofive-test-information {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 1rem;
+}
+
+.gofive-test-information article {
+  min-width: 0;
+}
+
+.gofive-test-information strong {
+  display: block;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 1200px) {
+  .gofive-result-layout {
+    grid-template-columns:
+      minmax(6rem, 0.65fr)
+      minmax(13rem, 1.35fr)
+      minmax(13rem, 1.35fr)
+      minmax(6rem, 0.65fr);
+
+    gap: 0.75rem;
+  }
+
+  .gofive-gauge,
+  .gauge {
+    width:
+      clamp(12rem, 23vw, 17rem);
+  }
+}
+
+@media (max-width: 900px) {
+  .gofive-connection-information {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .gofive-result-layout {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    grid-template-areas:
+      "download upload"
+      "ping jitter";
+
+    gap: 1rem;
+
+    min-height: auto;
+  }
+
+  .gofive-result-layout .download,
+  .gofive-result-layout .upload {
+    min-height: 17rem;
+  }
+
+  .gofive-result-layout .ping,
+  .gofive-result-layout .jitter {
+    min-height: 7rem;
+
+    padding: 1rem;
+
+    border: 1px solid
+      rgba(255, 255, 255, 0.08);
+
+    border-radius: 1rem;
+
+    background:
+      rgba(255, 255, 255, 0.035);
+  }
+
+  .gofive-gauge,
+  .gauge {
+    width:
+      clamp(13rem, 37vw, 18rem);
+  }
+
+  .gofive-test-information {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .gofive-result-summary__metrics {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .gofive-dashboard-main,
+  main {
+    padding-inline: 0.65rem;
+  }
+
+  .gofive-header__content,
+  .gofive-dashboard-header__content {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .gofive-connection-information {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .gofive-connection-information article {
+    padding: 0.85rem;
+  }
+
+  .gofive-server-section,
+  .gofive-test-controls {
+    width: 100%;
+  }
+
+  #start-button,
+  #share-results {
+    width: 100%;
+  }
+
+  .gofive-result-layout {
+    grid-template-columns: 1fr;
+
+    grid-template-areas:
+      "download"
+      "upload"
+      "ping"
+      "jitter";
+
+    gap: 0.75rem;
+  }
+
+  .gofive-result-layout .download,
+  .gofive-result-layout .upload {
+    min-height: 15rem;
+  }
+
+  .gofive-gauge,
+  .gauge {
+    width:
+      min(17rem, calc(100vw - 2rem));
+  }
+
+  .gofive-result-layout .ping,
+  .gofive-result-layout .jitter {
+    min-height: 6rem;
+  }
+
+  .gofive-result-summary {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .gofive-result-summary__metrics,
+  .gofive-result-summary__details,
+  .gofive-test-information {
+    grid-template-columns: 1fr;
+  }
+
+  .gofive-result-summary__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .gofive-test-information strong,
+  .gofive-result-summary__details strong {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 400px) {
+  .gofive-dashboard-main,
+  main {
+    padding-inline: 0.5rem;
+  }
+
+  .gofive-gauge,
+  .gauge {
+    width:
+      min(15rem, calc(100vw - 1.25rem));
+  }
+
+  .gofive-result-layout .download,
+  .gofive-result-layout .upload {
+    min-height: 14rem;
+  }
+
+  .gofive-summary-metric strong {
+    font-size: 1.5rem;
+  }
+}
+
+@media (
+  max-height: 520px
+) and (
+  orientation: landscape
+) {
+  .gofive-result-layout {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    grid-template-areas:
+      "download upload"
+      "ping jitter";
+  }
+
+  .gofive-result-layout .download,
+  .gofive-result-layout .upload {
+    min-height: 13rem;
+  }
+
+  .gofive-gauge,
+  .gauge {
+    width: 13rem;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  button,
+  .server-selector,
+  .servers button {
+    min-height: 2.75rem;
+  }
+
+  #start-button {
+    min-height: 3.5rem;
+  }
+
+  #start-button:hover {
+    transform: none;
+  }
+}
