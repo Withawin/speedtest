@@ -1586,3 +1586,135 @@ a:focus-visible {
     border-left: 0;
   }
 }
+
+/* ==========================================================
+   GoFive Test Lifecycle
+========================================================== */
+
+body {
+  --test-state-opacity: 1;
+}
+
+/*
+ * ปุ่มระหว่างเตรียมและกำลังทดสอบ
+ */
+body.test-state-preparing #start-button,
+body.test-state-running #start-button {
+  cursor: progress;
+  position: relative;
+}
+
+/*
+ * จุด Animation ขณะทดสอบ
+ */
+body.test-state-preparing #start-button::after,
+body.test-state-running #start-button::after {
+  content: "";
+  display: inline-block;
+
+  width: 0.55rem;
+  height: 0.55rem;
+
+  margin-left: 0.65rem;
+
+  border-radius: 50%;
+  background: currentColor;
+
+  vertical-align: middle;
+
+  animation: gofive-testing-pulse 1s ease-in-out infinite;
+}
+
+/*
+ * Gauge Animation ขณะกำลังทดสอบ
+ */
+body.test-state-running .gofive-gauge,
+body.test-state-running .gauge {
+  animation: gofive-gauge-active 1.8s ease-in-out infinite;
+}
+
+/*
+ * เมื่อทดสอบเสร็จให้ Gauge กลับมานิ่ง
+ */
+body.test-state-completed .gofive-gauge,
+body.test-state-completed .gauge {
+  animation: none;
+}
+
+/*
+ * Ping และ Jitter ต้องคง Grid Column เดิม
+ * แม้ในช่วงที่ถูกซ่อน
+ */
+.gofive-result-layout .ping {
+  grid-column: 1;
+}
+
+.gofive-result-layout .download {
+  grid-column: 2;
+}
+
+.gofive-result-layout .upload {
+  grid-column: 3;
+}
+
+.gofive-result-layout .jitter {
+  grid-column: 4;
+}
+
+/*
+ * ป้องกัน Layout กระโดดตอน Ping/Jitter ซ่อนอยู่
+ */
+.gofive-result-layout .ping.hidden,
+.gofive-result-layout .jitter.hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+
+  display: flex;
+}
+
+/*
+ * เมื่อเริ่มทดสอบให้แสดงแบบนุ่มนวล
+ */
+.gofive-result-layout .ping,
+.gofive-result-layout .jitter {
+  transition:
+    opacity 220ms ease,
+    visibility 220ms ease;
+}
+
+@keyframes gofive-testing-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes gofive-gauge-active {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+
+  50% {
+    filter: brightness(1.08);
+  }
+}
+
+/*
+ * รองรับผู้ใช้ที่ปิด Motion
+ */
+@media (prefers-reduced-motion: reduce) {
+  body.test-state-preparing #start-button::after,
+  body.test-state-running #start-button::after,
+  body.test-state-running .gofive-gauge,
+  body.test-state-running .gauge {
+    animation: none;
+  }
+}
