@@ -158,7 +158,7 @@
 
             <ul class="servers"></ul>
 
-            <p class="sponsor" id="sponsor">&nbsp;</p>
+            <p class="sponsor hidden" id="sponsor">&nbsp;</p>
 
           </div>
 
@@ -418,26 +418,85 @@
       <!-- ==================================================
            Share dialog
       =================================================== -->
-      <dialog id="share">
+      <dialog
+  id="share"
+  aria-labelledby="share-dialog-title"
+>
+  <div class="close-dialog">
+    <button
+      id="close-share-dialog"
+      class="gofive-dialog-close"
+      type="button"
+      aria-label="ปิดหน้าต่างแชร์ผล"
+    >
+      <img
+        src="images/close-button.svg"
+        alt=""
+        aria-hidden="true"
+      />
+    </button>
+  </div>
 
-        <div class="close-dialog">
-          <img
-            src="images/close-button.svg"
-            alt="ปิด"
-          />
-        </div>
+  <section class="gofive-share-dialog-content">
 
-        <img
-          id="results"
-          src=""
-          alt="ผลการทดสอบความเร็ว"
-        />
+    <header class="gofive-share-dialog-header">
+      <small>ผลการทดสอบล่าสุด</small>
 
-        <button id="copy-link" type="button">
-          คัดลอกลิงก์
-        </button>
+      <h2 id="share-dialog-title">
+        แชร์ผลการทดสอบ
+      </h2>
 
-      </dialog>
+      <p>
+        เลือกวิธีที่ต้องการใช้สำหรับบันทึกหรือแชร์ผลการทดสอบ
+      </p>
+    </header>
+
+    <img
+      id="results"
+      class="hidden"
+      src=""
+      alt="ผลการทดสอบความเร็ว"
+    />
+
+    <div class="gofive-share-actions">
+
+      <button
+        id="copy-link"
+        class="gofive-share-action"
+        type="button"
+      >
+        คัดลอกผลการทดสอบ
+      </button>
+
+      <button
+        id="native-share-result"
+        class="gofive-share-action"
+        type="button"
+      >
+        แชร์ผ่านอุปกรณ์
+      </button>
+
+      <button
+        id="export-result-json"
+        class="gofive-share-action"
+        type="button"
+      >
+        ดาวน์โหลด JSON
+      </button>
+
+    </div>
+
+    <p
+      id="share-result-status"
+      class="gofive-share-status"
+      role="status"
+      aria-live="polite"
+    >
+      เลือกวิธีแชร์ผลการทดสอบ
+    </p>
+
+  </section>
+</dialog>
 
 
       <!-- ==================================================

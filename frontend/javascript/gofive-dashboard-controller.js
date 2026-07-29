@@ -938,6 +938,21 @@ function resetTestMetadata() {
       });
     }
 
+    const serverList =
+  document.querySelector(".servers");
+
+if (serverList) {
+  const serverListObserver =
+    new MutationObserver(() => {
+      updateServerSelectorVisibility();
+    });
+
+  serverListObserver.observe(serverList, {
+    childList: true,
+    subtree: true
+  });
+}
+
     if (resultImage) {
       const resultObserver = new MutationObserver(() => {
         syncTestId();
@@ -1031,7 +1046,25 @@ function resetTestMetadata() {
     updateCurrentYear();
     updateDateTime();
     loadNetworkInformation();
+
+    const startButton = getElement("start-button");
+
+startButton?.addEventListener("click", () => {
+  const detectedState = detectTestState();
+
+  /*
+   * ซ่อนผลเก่าเฉพาะเมื่อผู้ใช้กดเริ่มทดสอบใหม่
+   * ไม่ซ่อนเมื่อกด Abort
+   */
+  if (
+    detectedState === "idle" ||
+    detectedState === "completed"
+  ) {
+    prepareSummaryForNewTest();
+  }
+});
     applyTestState("idle");
+    initializeResultSharing();
 
     /*
      * index.js ถูกโหลดหลัง Controller
@@ -1042,6 +1075,7 @@ function resetTestMetadata() {
         syncStartButtonText();
         syncTestState();
         syncTestId();
+        updateServerSelectorVisibility();
         observeLibreSpeedUi();
     }, 100);;
 
@@ -1174,11 +1208,401 @@ function renderTestResultSummary(result) {
     summaryPanel.classList.remove("hidden");
   }
 
-  const shareButton = getElement("share-results");
+const shareButton = getElement("share-results");
 
-  if (shareButton) {
-    shareButton.classList.remove("hidden");
+if (shareButton) {
+  shareButton.classList.remove("hidden");
+  shareButton.hidden = false;
+  shareButton.disabled = false;
+
+  shareButton.removeAttribute("hidden");
+  shareButton.removeAttribute("aria-hidden");
+
+  shareButton.style.removeProperty("display");
+}
+}
+
+/**
+ * สร้างข้อความสำหรับแชร์ผลการทดสอบ
+ *
+ * @param {object|null} result
+ * @returns {string}
+ */
+function buildShareResultText(result) {
+  if (!result) {
+    return "";
   }
+
+  const completedAt =
+    result.completedAt instanceof Date
+      ? formatSpecifiedDateTime(result.completedAt)
+      : "-";
+
+  return [
+    "GoFive Internal Speed Test",
+    "",
+    `Download: ${formatResultValue(result.download)} Mbps`,
+    `Upload: ${formatResultValue(result.upload)} Mbps`,
+    `Ping: ${formatResultValue(result.ping)} ms`,
+    `Jitter: ${formatResultValue(result.jitter)} ms`,
+    `Duration: ${formatDuration(result.durationSeconds)}`,
+    `Server: ${result.server || "-"}`,
+    `Completed: ${completedAt}`
+  ].join("\n");
+}
+
+/**
+ * แสดงข้อความสถานะใน Share Dialog
+ *
+ * @param {string} message
+ * @param {"success"|"error"|"info"} type
+ */
+function setShareStatus(message, type = "info") {
+  const statusElement = getElement(
+    "share-result-status"
+  );
+
+  if (!statusElement) {
+    return;
+  }
+
+  statusElement.textContent = message;
+
+  statusElement.dataset.statusType = type;
+}
+
+async function copyTextToClipboard(text) {
+  if (!text) {
+    return false;
+  }
+
+  if (
+    navigator.clipboard &&
+    typeof navigator.clipboard.writeText === "function" &&
+    window.isSecureContext
+  ) {
+    await navigator.clipboard.writeText(text);
+
+    return true;
+  }
+
+  const temporaryTextArea =
+    document.createElement("textarea");
+
+  temporaryTextArea.value = text;
+  temporaryTextArea.setAttribute("readonly", "");
+
+  temporaryTextArea.style.position = "fixed";
+  temporaryTextArea.style.left = "-9999px";
+  temporaryTextArea.style.opacity = "0";
+
+  document.body.appendChild(temporaryTextArea);
+
+  temporaryTextArea.focus();
+  temporaryTextArea.select();
+
+  const copied = document.execCommand("copy");
+
+  temporaryTextArea.remove();
+
+  return copied;
+}
+
+/**
+ * คัดลอกผลการทดสอบล่าสุด
+ */
+async function copyCurrentResult() {
+  if (!lastTestResult) {
+    setShareStatus(
+      "ยังไม่มีผลการทดสอบสำหรับคัดลอก",
+      "error"
+    );
+
+    return;
+  }
+
+  const shareText =
+    buildShareResultText(lastTestResult);
+
+  try {
+    const copied =
+      await copyTextToClipboard(shareText);
+
+    if (!copied) {
+      throw new Error(
+        "Clipboard operation was not successful"
+      );
+    }
+
+    setShareStatus(
+      "คัดลอกผลการทดสอบแล้ว",
+      "success"
+    );
+  } catch (error) {
+    console.warn(
+      "GoFive Dashboard: Unable to copy result.",
+      error
+    );
+
+    setShareStatus(
+      "ไม่สามารถคัดลอกผลการทดสอบได้",
+      "error"
+    );
+  }
+}
+
+/**
+ * แชร์ผลผ่าน Web Share API
+ */
+async function shareCurrentResult() {
+  if (!lastTestResult) {
+    setShareStatus(
+      "ยังไม่มีผลการทดสอบสำหรับแชร์",
+      "error"
+    );
+
+    return;
+  }
+
+  if (
+    typeof navigator.share !== "function"
+  ) {
+    await copyCurrentResult();
+
+    setShareStatus(
+      "Browser ไม่รองรับการแชร์ จึงคัดลอกผลไว้แล้ว",
+      "info"
+    );
+
+    return;
+  }
+
+  const shareText =
+    buildShareResultText(lastTestResult);
+
+  try {
+    await navigator.share({
+      title: "GoFive Internal Speed Test",
+      text: shareText
+    });
+
+    setShareStatus(
+      "แชร์ผลการทดสอบแล้ว",
+      "success"
+    );
+  } catch (error) {
+    /*
+     * AbortError หมายถึงผู้ใช้กดยกเลิก Share Dialog
+     * ไม่จำเป็นต้องแสดงเป็น Error
+     */
+    if (error?.name === "AbortError") {
+      setShareStatus(
+        "ยกเลิกการแชร์",
+        "info"
+      );
+
+      return;
+    }
+
+    console.warn(
+      "GoFive Dashboard: Unable to share result.",
+      error
+    );
+
+    setShareStatus(
+      "ไม่สามารถแชร์ผลการทดสอบได้",
+      "error"
+    );
+  }
+}
+
+/**
+ * คืนผลการทดสอบล่าสุดในรูปแบบ Object
+ *
+ * @returns {object|null}
+ */
+function exportCurrentResult() {
+  if (!lastTestResult) {
+    return null;
+  }
+
+  return {
+    application: "GoFive Internal Speed Test",
+    version: 1,
+
+    result: {
+      downloadMbps: lastTestResult.download,
+      uploadMbps: lastTestResult.upload,
+      pingMs: lastTestResult.ping,
+      jitterMs: lastTestResult.jitter,
+      durationSeconds:
+        lastTestResult.durationSeconds,
+      server: lastTestResult.server
+    },
+
+    timestamps: {
+      startedAt:
+        lastTestResult.startedAt instanceof Date
+          ? lastTestResult.startedAt.toISOString()
+          : null,
+
+      completedAt:
+        lastTestResult.completedAt instanceof Date
+          ? lastTestResult.completedAt.toISOString()
+          : null
+    },
+
+    client: {
+      ip:
+        getElement("client-ip")
+          ?.textContent
+          .trim() || null,
+
+      device:
+        getElement("client-device")
+          ?.textContent
+          .trim() || null,
+
+      browser:
+        getElement("client-browser")
+          ?.textContent
+          .trim() || null,
+
+      connectionType:
+        getElement("connection-type")
+          ?.textContent
+          .trim() || null,
+
+      timezone:
+        detectTimezone()
+    }
+  };
+}
+
+/**
+ * สร้างชื่อไฟล์ Result
+ *
+ * @returns {string}
+ */
+function createResultFileName() {
+  const now = new Date();
+
+  const datePart = now
+    .toISOString()
+    .slice(0, 19)
+    .replace(/[:T]/g, "-");
+
+  return `gofive-speedtest-${datePart}.json`;
+}
+
+/**
+ * ดาวน์โหลดผลการทดสอบเป็น JSON
+ */
+function downloadCurrentResultJson() {
+  const exportedResult =
+    exportCurrentResult();
+
+  if (!exportedResult) {
+    setShareStatus(
+      "ยังไม่มีผลการทดสอบสำหรับดาวน์โหลด",
+      "error"
+    );
+
+    return;
+  }
+
+  const jsonContent = JSON.stringify(
+    exportedResult,
+    null,
+    2
+  );
+
+  const resultBlob = new Blob(
+    [jsonContent],
+    {
+      type: "application/json;charset=utf-8"
+    }
+  );
+
+  const objectUrl =
+    URL.createObjectURL(resultBlob);
+
+  const downloadLink =
+    document.createElement("a");
+
+  downloadLink.href = objectUrl;
+  downloadLink.download =
+    createResultFileName();
+
+  document.body.appendChild(downloadLink);
+
+  downloadLink.click();
+  downloadLink.remove();
+
+  window.setTimeout(() => {
+    URL.revokeObjectURL(objectUrl);
+  }, 1000);
+
+  setShareStatus(
+    "ดาวน์โหลดไฟล์ JSON แล้ว",
+    "success"
+  );
+}
+
+/**
+ * เปิด Share Dialog
+ */
+function openShareDialog() {
+  if (!lastTestResult) {
+    return;
+  }
+
+  const shareDialog = getElement("share");
+
+  if (!shareDialog) {
+    return;
+  }
+
+  setShareStatus(
+    "เลือกวิธีแชร์ผลการทดสอบ",
+    "info"
+  );
+
+  if (
+    typeof shareDialog.showModal === "function"
+  ) {
+    if (!shareDialog.open) {
+      shareDialog.showModal();
+    }
+  } else {
+    shareDialog.setAttribute("open", "");
+  }
+
+  window.setTimeout(() => {
+    getElement("copy-result")?.focus();
+  }, 0);
+}
+
+/**
+ * ปิด Share Dialog
+ */
+function closeShareDialog() {
+  const shareDialog = getElement("share");
+
+  if (!shareDialog) {
+    return;
+  }
+
+  if (
+    typeof shareDialog.close === "function" &&
+    shareDialog.open
+  ) {
+    shareDialog.close();
+  } else {
+    shareDialog.removeAttribute("open");
+  }
+
+  getElement("share-results")?.focus();
 }
 
 /**
@@ -1261,7 +1685,6 @@ function applyTestState(nextState) {
 
     resetTestMetadata();
     syncSelectedServer();
-    prepareSummaryForNewTest();
   }
 
   /*
@@ -1275,21 +1698,26 @@ function applyTestState(nextState) {
   /*
    * เมื่อทดสอบเสร็จให้อ่าน Test ID อีกครั้ง
    */
-if (
-  nextState === "completed" &&
-  previousState !== "completed"
-) {
+if (nextState === "completed") {
   syncTestId();
   syncSelectedServer();
 
   /*
-   * รอให้ LibreSpeed อัปเดตค่าครั้งสุดท้ายก่อน Capture
+   * Capture เฉพาะตอนเปลี่ยนเข้าสู่ completed ครั้งแรก
    */
-  window.setTimeout(() => {
-    const result = captureTestResult();
+  if (previousState !== "completed") {
+    window.setTimeout(() => {
+      const result = captureTestResult();
 
-    renderTestResultSummary(result);
-  }, 300);
+      renderTestResultSummary(result);
+    }, 300);
+  } else if (lastTestResult) {
+    /*
+     * หากมี Mutation รอบถัดไป ให้ยืนยันว่าปุ่มและ Summary
+     * ยังคงแสดงอยู่
+     */
+    renderTestResultSummary(lastTestResult);
+  }
 }
 }
 
@@ -1301,37 +1729,83 @@ function syncTestState() {
 
   applyTestState(detectedState);
 }
-/**
- * ตรวจสอบและ Synchronize Test State
- */
-function syncTestState() {
-  const detectedState = detectTestState();
-
-  applyTestState(detectedState);
-}
 
 /**
- * เริ่มต้น Dashboard Controller
+ * ผูก Event ของ Share Result
  */
-function initializeDashboardController() {
-  updateClientInformation();
-  updateNetworkStatus();
-  updateCurrentYear();
-  updateDateTime();
-  loadNetworkInformation();
-  applyTestState("idle");
+function initializeResultSharing() {
+  const shareResultsButton =
+    getElement("share-results");
 
-  window.setTimeout(() => {
-    syncSelectedServer();
-    syncStartButtonText();
-    syncTestState();
-    syncTestId();
-    observeLibreSpeedUi();
-  }, 100);
+  const copyResultButton =
+    getElement("copy-link");
 
-  observeNetworkInformation();
+  const nativeShareButton =
+    getElement("native-share-result");
 
-  window.setInterval(updateDateTime, 1000);
+  const exportJsonButton =
+    getElement("export-result-json");
+
+  const closeShareButton =
+    getElement("close-share-dialog");
+
+  const shareDialog =
+    getElement("share");
+
+  shareResultsButton?.addEventListener(
+    "click",
+    event => {
+      event.preventDefault();
+      openShareDialog();
+    }
+  );
+
+  copyResultButton?.addEventListener(
+    "click",
+    copyCurrentResult
+  );
+
+  nativeShareButton?.addEventListener(
+    "click",
+    shareCurrentResult
+  );
+
+  exportJsonButton?.addEventListener(
+    "click",
+    downloadCurrentResultJson
+  );
+
+  closeShareButton?.addEventListener(
+    "click",
+    closeShareDialog
+  );
+
+  if (
+    nativeShareButton &&
+    typeof navigator.share !== "function"
+  ) {
+    nativeShareButton.classList.add("hidden");
+  }
+
+  shareDialog?.addEventListener(
+    "click",
+    event => {
+      /*
+       * ปิดเมื่อคลิกบริเวณ backdrop ของ dialog
+       */
+      if (event.target === shareDialog) {
+        closeShareDialog();
+      }
+    }
+  );
+
+  shareDialog?.addEventListener(
+    "cancel",
+    event => {
+      event.preventDefault();
+      closeShareDialog();
+    }
+  );
 }
 
 if (document.readyState === "loading") {
@@ -1342,6 +1816,59 @@ if (document.readyState === "loading") {
   );
 } else {
   initializeDashboardController();
+}
+/**
+ * Public API สำหรับ Debug และ Integration ในอนาคต
+ */
+window.GoFiveSpeedTest = Object.freeze({
+  getLastResult() {
+    return exportCurrentResult();
+  },
+
+  copyResult() {
+    return copyCurrentResult();
+  },
+
+  shareResult() {
+    return shareCurrentResult();
+  },
+
+  downloadJson() {
+    return downloadCurrentResultJson();
+  }
+});
+
+/**
+ * ซ่อน Server Selector เมื่อมี Server ให้เลือกเพียงตัวเดียว
+ */
+function updateServerSelectorVisibility() {
+  const serverSection = document.querySelector(
+    ".gofive-server-section"
+  );
+
+  const serverList = document.querySelector(
+    ".servers"
+  );
+
+  if (!serverSection || !serverList) {
+    return;
+  }
+
+  const availableServers =
+    serverList.querySelectorAll("li").length;
+
+  const shouldHide =
+    availableServers <= 1;
+
+  serverSection.classList.toggle(
+    "hidden",
+    shouldHide
+  );
+
+  serverSection.setAttribute(
+    "aria-hidden",
+    shouldHide ? "true" : "false"
+  );
 }
 
 })();

@@ -2300,12 +2300,14 @@ main {
 .gofive-server-section,
 .gofive-test-controls,
 .gofive-result-layout,
-.gofive-result-summary,
-.gofive-test-information {
+.gofive-result-summary{
   width: min(100%, 1180px);
   margin-inline: auto;
 }
-
+.gofive-test-information{
+    width:min(1100px,85%);
+    margin-inline:auto;
+}
 .gofive-header,
 .gofive-dashboard-header {
   width: min(100%, 1180px);
@@ -2731,4 +2733,501 @@ main {
   #start-button:hover {
     transform: none;
   }
+}
+/* ==========================================================
+   Commit 11 — Result Sharing Dialog
+========================================================== */
+
+#share {
+  width: min(42rem, calc(100% - 2rem));
+  max-height: calc(100vh - 2rem);
+
+  padding: 0;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.25rem;
+
+  background: rgba(20, 24, 32, 0.96);
+  color: inherit;
+
+  box-shadow:
+    0 2rem 6rem rgba(0, 0, 0, 0.45);
+
+  overflow: auto;
+}
+
+#share::backdrop {
+  background: rgba(0, 0, 0, 0.68);
+  backdrop-filter: blur(0.35rem);
+}
+
+.gofive-share-dialog-content {
+  padding: 1.5rem;
+}
+
+.gofive-share-dialog-header {
+  padding-right: 2.5rem;
+}
+
+.gofive-share-dialog-header small {
+  display: block;
+  margin-bottom: 0.3rem;
+  opacity: 0.65;
+}
+
+.gofive-share-dialog-header h2 {
+  margin: 0;
+}
+
+.gofive-share-dialog-header p {
+  margin: 0.65rem 0 0;
+  opacity: 0.72;
+}
+
+#share .close-dialog {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  z-index: 2;
+}
+
+.gofive-dialog-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+
+  border: 0;
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.07);
+  cursor: pointer;
+}
+
+.gofive-dialog-close img {
+  width: 1rem;
+  height: 1rem;
+}
+
+.gofive-share-actions {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.gofive-share-action {
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.85rem;
+
+  background: rgba(255, 255, 255, 0.055);
+  color: inherit;
+
+  font: inherit;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.gofive-share-action:hover {
+  transform: translateY(-0.1rem);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.gofive-share-action:active {
+  transform: scale(0.985);
+}
+
+.gofive-share-action:focus-visible,
+.gofive-dialog-close:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.34);
+  outline-offset: 0.2rem;
+}
+
+.gofive-share-status {
+  min-height: 1.5rem;
+  margin: 1rem 0 0;
+
+  font-size: 0.875rem;
+  text-align: center;
+
+  opacity: 0.8;
+}
+
+@media (max-width: 700px) {
+  #share {
+    width: calc(100% - 1rem);
+  }
+
+  .gofive-share-dialog-content {
+    padding: 1.15rem;
+  }
+
+  .gofive-share-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .gofive-share-action {
+    width: 100%;
+  }
+}
+
+#share[open]{
+    position: fixed;
+
+    top: 50%;
+    left: 50%;
+
+    margin: 0;
+
+    transform: translate(-50%, -50%);
+
+    width: min(680px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+
+    overflow: auto;
+}
+
+#share::backdrop{
+    background: rgba(0,0,0,.65);
+    backdrop-filter: blur(6px);
+}
+
+/* ==========================================================
+   Compact First View
+========================================================== */
+
+#sponsor {
+  display: none !important;
+}
+
+.gofive-heading {
+  margin-bottom: 2.6rem;
+}
+
+.gofive-connection {
+  margin-bottom: 1.4rem;
+}
+
+.gofive-start-button {
+  margin-top: 0.6rem;
+  margin-bottom: 2.8rem;
+}
+
+.gofive-result-layout {
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 1000px) and (min-height: 760px) {
+  .gofive-dashboard {
+    padding-top: clamp(2.8rem, 5vh, 5rem);
+    padding-bottom: 1.5rem;
+  }
+
+  .gofive-heading h1 {
+    font-size: clamp(3.8rem, 4.2vw, 5rem);
+  }
+
+  .gofive-heading {
+    margin-bottom: 2.4rem;
+  }
+
+  .gofive-connection-grid {
+    row-gap: 1.4rem;
+  }
+
+  .gofive-start-button {
+    min-height: 5.6rem;
+    margin-bottom: 2.6rem;
+  }
+
+  .gofive-result-layout {
+    min-height: 23rem;
+  }
+
+  .gofive-test-information {
+    margin-bottom: 1.8rem;
+  }
+}
+
+/* ==========================================================
+   Commit 11.1 — Compact First View
+   - Hide LibreSpeed connection notice
+   - Hide single-server selector section
+   - Tighten vertical spacing for 1080p/laptop screens
+========================================================== */
+
+#privacy-warning {
+  display: none !important;
+}
+
+.gofive-server-section.hidden {
+  display: none !important;
+}
+
+.gofive-dashboard {
+  padding-top: clamp(2.4rem, 4.2vh, 4.2rem);
+  padding-bottom: 1.4rem;
+}
+
+.gofive-heading {
+  margin-bottom: 2rem;
+}
+
+.gofive-heading .tagline {
+  margin-top: 0.7rem;
+}
+
+.gofive-connection {
+  margin-bottom: 1.2rem;
+}
+
+.gofive-connection > h2 {
+  margin-bottom: 1.4rem;
+}
+
+.gofive-connection-grid {
+  row-gap: 1.4rem;
+}
+
+.gofive-start-button {
+  min-height: 5.4rem;
+  margin-top: 0.5rem;
+  margin-bottom: 2.2rem;
+}
+
+.gofive-result-layout {
+  min-height: 23rem;
+  margin-top: 0;
+  margin-bottom: 1.6rem;
+}
+
+.gofive-test-information {
+  margin-top: 0.6rem;
+  margin-bottom: 1.8rem;
+}
+
+.gofive-footer {
+  padding-top: 1.2rem;
+  padding-bottom: 1.8rem;
+}
+
+@media (min-width: 1000px) and (min-height: 760px) {
+  .gofive-heading h1 {
+    font-size: clamp(4rem, 4.2vw, 5rem);
+  }
+
+  .gofive-dashboard {
+    padding-top: clamp(2.8rem, 4.5vh, 4.6rem);
+  }
+
+  .gofive-result-layout {
+    min-height: 22rem;
+  }
+
+  .gofive-gauge {
+    height: 23rem;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 820px) {
+  .gofive-dashboard {
+    padding-top: 2.2rem;
+    padding-bottom: 1rem;
+  }
+
+  .gofive-heading {
+    margin-bottom: 1.4rem;
+  }
+
+  .gofive-heading h1 {
+    font-size: clamp(3.6rem, 4vw, 4.6rem);
+  }
+
+  .gofive-heading .tagline {
+    margin-top: 0.45rem;
+  }
+
+  .gofive-connection {
+    margin-bottom: 0.9rem;
+  }
+
+  .gofive-connection > h2 {
+    margin-bottom: 1rem;
+  }
+
+  .gofive-connection-grid {
+    row-gap: 1rem;
+  }
+
+  .gofive-start-button {
+    min-height: 4.8rem;
+    margin-top: 0.35rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .gofive-result-layout {
+    min-height: 20rem;
+    margin-bottom: 1rem;
+  }
+
+  .gofive-gauge {
+    height: 21rem;
+  }
+
+  .gofive-test-information {
+    margin-top: 0.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .gofive-footer {
+    padding-top: 0.8rem;
+    padding-bottom: 1rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .gofive-dashboard {
+    padding-top: 3rem;
+  }
+
+  .gofive-heading {
+    margin-bottom: 2rem;
+  }
+
+  .gofive-start-button {
+    margin-bottom: 2.4rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .gofive-dashboard {
+    padding-top: 2.4rem;
+  }
+
+  .gofive-heading {
+    margin-bottom: 1.8rem;
+  }
+
+  .gofive-connection {
+    margin-bottom: 1rem;
+  }
+
+  .gofive-start-button {
+    margin-bottom: 2rem;
+  }
+
+  .gofive-result-layout {
+    margin-bottom: 1.2rem;
+  }
+}
+/* ==========================================================
+   Better Vertical Rhythm
+========================================================== */
+
+.gofive-heading{
+    margin-bottom:3rem;
+}
+
+.gofive-heading h1{
+    margin-bottom:.75rem;
+}
+
+.gofive-heading p{
+    margin-bottom:0;
+}
+
+.gofive-connection{
+    margin-bottom:2.25rem;
+}
+
+.gofive-connection > h2{
+    margin-bottom:2rem;
+}
+
+.gofive-connection-grid{
+    row-gap:1.5rem;
+    column-gap:3rem;
+}
+
+.gofive-test-controls{
+    margin-top:2.25rem;
+    margin-bottom:3.5rem;
+}
+
+.gofive-result-layout{
+    margin-bottom:3rem;
+}
+
+.gofive-test-information{
+    margin-top:1rem;
+    margin-bottom:3rem;
+}
+
+.gofive-footer{
+    padding-top:2rem;
+}
+
+/* ==========================================================
+   Hero Start Button
+========================================================== */
+
+.gofive-start-button,
+#startStopBtn,
+#start-button {
+
+    width: min(340px, 90vw);
+
+    height: 64px;
+
+    border-radius: 999px;
+
+    font-size: 1.35rem;
+    font-weight: 700;
+
+    letter-spacing: .02em;
+
+    transition:
+        transform .2s ease,
+        box-shadow .25s ease,
+        background .25s ease;
+}
+
+.gofive-start-button:hover,
+#startStopBtn:hover,
+#start-button:hover{
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 12px 30px rgba(255,255,255,.18);
+}
+
+.gofive-start-button:active,
+#startStopBtn:active,
+#start-button:active{
+
+    transform: scale(.98);
+}
+
+/* ==========================================================
+   Hide Bottom Test Information
+========================================================== */
+
+.gofive-test-information{
+    display:none !important;
 }
